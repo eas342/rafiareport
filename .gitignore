@@ -1,0 +1,13 @@
+*.log
+*.out
+*.bbl
+*.aux
+*.top
+*.synctex.gz
+*.blg
+*.tui
+*.DS_Store
+paper.pdf
+msNotes.bib
+*~
+
