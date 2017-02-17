@@ -1,4 +1,4 @@
-\documentclass[conference]{IEEEtran}
+ \documentclass[conference]{IEEEtran}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subfigure}
@@ -31,94 +31,160 @@ To understand the details of the telescope and it's camera, the instrument modul
 
 \section{Procedure}
 As mentioned above, this paper deals with analyzing NIRCam test data to extract time series and create light curves. Light curve is a plot demonstrating the variation of light received from a source over a certain amount of time. For the test, electrical lamps were used as light source.\\
-The first step in creating a light curve is extracting flux and the corresponding time intervals. However, there are some complications in that process e.g. generating separate centers for each image, deciding on an aperture radius, subtracting background noise etc. To properly describe the whole method, we have divided it into small sections and briefly described them below.   
+The first step in creating a light curve is extracting flux and the corresponding time intervals. However, there are some complications in that process e.g. generating separate centers for each image, deciding on an aperture radius, subtracting background noise etc. \\
+Unless otherwise mentioned, flux comparison in all tests uses background subtracted, averaged(over A \& B detector) flux; For all tests, standard deviation is measured after detrending the data with a linear best fit. To properly describe the whole method, we have divided it into small sections and briefly described them below.   
 
 
-\subsection{Extracting Flux and Time}
-This is the first step of creating a light curve.\\
-The time for each image in a test is extracted from some information provided in the header of the fits file. Time is calculated using the following formula:
-$$Time =  (NGROUP  + 1) * TGROUP * (ON\_NINT - 1)$$
-Where, \\
-$NGROUP$ = Number groups in an integration\\
-$TGROUP$ = Delta time between groups\\
-$ON\_NINT$ = INT of total number of NINT in original file\\
-These are information that can be found in the header of the respective fits file. \\
-Extracting flux involves many small components and thus deserves to be broken down to subdivisions. So the next few subsections will sequentially describe how we extracted the Flux.
+    \subsection{Extracting Flux and Time}
+    This is the first step of creating a light curve.\\
+    The time for each image in a test is extracted from some information provided in the header of the fits file. Time is calculated using the following formula:
+    $$Time =  (NGROUP  + 1) * TGROUP * (ON\_NINT - 1)$$ 
+    Where, \\
+    $NGROUP$ = Number groups in an integration\\
+    $TGROUP$ = Delta time between groups\\
+    $ON\_NINT$ = INT of total number of NINT in original file\\
+    These are information that can be found in the header of the respective fits file. \\
+    Extracting flux involves many small components and thus deserves to be broken down to subdivisions. So the next few subsections will sequentially describe how we extracted the Flux.
 
-\subsubsection{Generating Slope Images}
-Flux is calculated in data numbers per second ($DN/s$), so it is a slope calculated from the data. There are different ways to generate slope images.\\
-If the files are in .slp format, they can be used as is because the slopes have already been calculated. The .slp files should be used if $NGROUP > 2$ because then there is enough reads for a good fit.\\
-If $NGROUP = 2$, the .red formats should be used. The slopes are not calculated and there are 2 reads to calculate the slope from. There are two ways to calculate the slope.\\
-The first is called the Slope1 method, also known as CDS (Correlated Double Subtraction). In this method, slope is calculated using the following formula:
-$$\frac{(Last Group - First Group)}{(NGROUP-1)*TGROUP}$$
-The second method for calculating slope from a .red file is the Slope2 method. Slope is calculated in the following way:
-$$\frac{(Last Group - Bias)}{NGROUP*TGROUP}$$
-After comparison, we found that the Slope2 method gives better results. This is demonstrated in the figure below.
-\begin{figure}[H]
-\includegraphics[scale=0.35]{Slopes}
-\caption{Plot demonstrating light curves \& standard deviations obtained using Slope1 and Slope2 methods for 5 different tests.}
-\label{fig:slopes}
-\end{figure}
-So wherever applicable, we will be using the Slope2 method.   
-
-\subsubsection{Generating Centers}
-For the same test, for a particular detector, expecting all the images to share a common center is a good approximation but not very accurate. So if the model's center is fitted to a Gaussian model, that gives a much closer approximation of an individual image's center. Here is an example Gaussian fit:
-\begin{figure}[H]
-\includegraphics[scale=0.5]{Gaussian}
-\caption{Example of Gaussian fitting to an image's center}
-\end{figure}
-The flux is extracted using circular aperture, for which the center is needed. When extracting flux from each image of a test, their individual center obtained from Gaussian fitting will be used.  
-
-\subsubsection{Radius Testing}
-The circular aperture function used for flux extraction also requires a radius. This radius is the source radius. The radius has to be chosen so that the measured error or standard deviation is minimum. For this, we extract the flux multiple times using varying radius values and calculate standard deviations. Here is plot showing how the best radius is chosen:
-\begin{figure}[H]
-\includegraphics[scale=0.5]{Radius}
-\caption{A plot of Standard Deviation Vs. Aperture Radius. The minimum of the curve gives the best aperture radius}
-\end{figure}
-
-
-\subsubsection{Subtracting Background}
-Other than the light received from the source, there is usually some background noise that we have to account for in order to get more accurate results. For this we are using an annulus out side the source to subtract. The annulus has an inner radius and an outer radius. So now, there are three different radii to consider: source radius, inner radius (BG subtraction) and inner radius (BG subtraction). The best combination of these three is determined through a radius test. 
-\begin{figure}[H]
-\includegraphics[scale=0.45]{Combo}
-\caption{A plot of Standard Deviation Vs. Source Radius for different combinations of inner and out radii. The minimum of the curve gives the best combination}
-\end{figure}
-
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}{1}
-        \includegraphics[scale = 0.5]{Radius_640}
-        \caption{SUB640}
-    \end{subfigure}
-
-    \begin{subfigure}{2}
-        \includegraphics[scale=0.6]{Radius_CLR}
-        \caption{CLRSUB}
-    \end{subfigure}
-\end{figure}
+        \subsubsection{Generating Slope Images}
+        Flux is calculated in data numbers per second ($DN/s$), so it is a slope calculated from the data. There are different ways to generate slope images.\\
+        If the files are in .slp format, they can be used as is because the slopes have already been calculated. The .slp files should be used if $NGROUP > 2$ because then there is enough reads for a good fit.\\
+        If $NGROUP = 2$, the .red formats should be used. The slopes are not calculated and there are 2 reads to calculate the slope from. There are two ways to calculate the slope.\\
+        The first is called the Slope1 method, also known as CDS (Correlated Double Subtraction). In this method, slope is calculated using the following formula:
+        $$\frac{(Last Group - First Group)}{(NGROUP-1)*TGROUP}$$
+        The second method for calculating slope from a .red file is the Slope2 method. Slope is calculated in the following way:
+        $$\frac{(Last Group - Bias)}{NGROUP*TGROUP}$$
+        After comparison, we found that the Slope2 method gives better results. This is demonstrated in the figure below.
+        \begin{figure}[H]
+            \includegraphics[width=0.5\textwidth]{Slopes}
+            \caption{Plot demonstrating light curves \& standard deviations obtained using Slope1 and Slope2 methods for 5 different tests.}
+            \label{fig:slopes}
+        \end{figure}
+        So wherever applicable, we will be using the Slope2 method.   
+        
+        \subsubsection{Generating Centers}
+        For the same test, for a particular detector, expecting all the images to share a common center is a good approximation but not very accurate. The center position is slightly for each image in the time series. This is demonstrated below:
+        
+        \begin{figure}[H]
+            \includegraphics[width=0.5\textwidth]{center_positions}
+            \caption{Center positions Vs. image number. The x-axis represents each individual image in the time series}
+        \end{figure}
+        
+        So we need speratecenter positions for each individual image. If the model's center is fitted to a Gaussian model, that gives a much closer approximation of an individual image's center. Here is an example Gaussian fit:
+        
+        \begin{figure}[H]
+            \includegraphics[scale=0.5]{Gaussian}
+            \caption{Example of Gaussian fitting to an image's center}
+        \end{figure}
+        The flux is extracted using circular aperture, for which the center is needed. When extracting flux from each image of a test, their individual center obtained from Gaussian fitting will be used.  
+        
+        \subsubsection{Radius Testing}
+        The circular aperture function used for flux extraction also requires a radius. This radius is the source radius. The radius has to be chosen so that the measured error or standard deviation is minimum. For this, we extract the flux multiple times using varying radius values and calculate standard deviations. Here is plot showing how the best radius is chosen:
+        \begin{figure}[H]
+            \includegraphics[scale=0.5]{Radius}
+            \caption{A plot of Standard Deviation Vs. Aperture Radius. The minimum of the curve gives the best aperture radius}
+        \end{figure}
+        
+        Here is a figure to help visualize how much flux is enclosed by different radii:
+        
+        \begin{figure}[H]
+            \includegraphics[width=0.5\textwidth]{varying_r.png}
+            \caption{Rings of varying radius over the PSF}
+        \end{figure}
+        
+        
+        \subsubsection{Subtracting Background}
+        Other than the light received from the source, there is usually some background noise that we have to account for in order to get more accurate results. For this we are using an annulus out side the source to subtract. For Background subtraction there a few different factors to consider,e.g. the shape of annulus, the type of average, pixel count at the edge of annulus etc. We tested different methods which are a combination of two annulus shapes (circular annulus \& circle inside square (CIS)) and three different types of average (mean, median and MAD(robust average)). We compared our results with circular annulus of astropy which considers fractional pixels at the edge.
+        
+        \begin{figure}[H]
+            \includegraphics[width = 0.5\textwidth]{Bg}
+            \caption{Comparing different methods of background subtractions.}
+        \end{figure}
+        
+        In most cases, the robust average with circular annulus seems to be doing slightly better than others and usually is almost the same as astropy's circular annulus. Since astropy's circular annulus is not very different from the robust average, in our test, we use astropy as it takes care of fractional pixels.\\
+        
+        The annulus has an inner radius and an outer radius. So now, there are three different radii to consider: source radius, inner radius (BG subtraction) and outer radius (BG subtraction). The best combination of these three is determined through a radius test. 
+        
+        \begin{figure}[H]
+            \centering
+            \begin{subfigure}{1}
+                \includegraphics[width = 0.5\textwidth]{Combo}
+                \caption{SUB320}
+            \end{subfigure}
+        
+            \begin{subfigure}{2}
+                \includegraphics[width = 0.5\textwidth]{Radius_640}
+                \caption{SUB640}
+            \end{subfigure}
+            
+            \begin{subfigure}{3}
+                \includegraphics[width = 0.5\textwidth]{Radius_CLR}
+                \caption{CLRSUB}
+            \end{subfigure}
+            \caption{A plot of Standard Deviation Vs. Source Radius for different combinations of inner and out radii. The minimum of the curves give the best combination}
+        \end{figure}
+        
+        So far we have been trying out different shapes for background. Now we take a different approach by subtracting background from each column of each image. For a each column, we masked the source pixels and pixels outside the background range. We fit a polynomial to the background and subtract it off from the original. Here is a demonstration of the difference between the original and background subtracted version:
+        
+        \begin{figure}[H]
+            \centering
+            \begin{subfigure}{1}
+                \includegraphics[width = 0.5\textwidth]{col_plot}
+                \caption{A plot of the 160th column of an image in its original, masked, fitted and background subtracted forms}
+            \end{subfigure}
+        
+            \begin{subfigure}{2}
+                \includegraphics[width = 0.5\textwidth]{col_image}
+                \caption{Comparing the background subtracted image(left) to the original one(right)}
+            \end{subfigure}
+        \end{figure}
+        
+        
+        \subsubsection{Testing Source Aperture Geometry}
+        So far, we kept a basic source aperture (circular aperture) and carried on with other tests like radius combination, generating centers, background subtraction etc. Now that we have a grasp on the other features, we test which source aperture geometry works best with those features. Apart from the circular aperture, we used an annular aperture. 
+        
+        \begin{figure}[H]
+            \includegraphics[scale=0.4]{Annular_source}
+            \caption{The annular source aperture used for comparison.}
+        \end{figure}
+        
+        \begin{center}
+            \centering
+            \label{tab:table 1}
+            \begin{tabular}{|c c c|}
+                \hline
+                 Test Name & Aperture Type & Standard Deviation  \\
+                 \hline
+                 WLP8SUB & Circular & 1559.33502547 \\
+                 WLP8SUB & Annular & 1581.60938155 \\
+                 FULL1 & Circular & 2681.52173084 \\
+                 FULL1 & Annular & 2509.46089297 \\
+                 \hline
+            \end{tabular}
+            \caption{Comparing between circular \& annular aperture}
+        \end{center}
+     
  
- 
-\subsection{Fitting Data To A 1D-Linear Model}
-In order to get the proper standard deviation, the data is fit to a linear model to remove any trend. The data is then divided by the line to get a "de-trended" time series. Here is an example of a linear best fit:
-\begin{figure}[H]
-\includegraphics[scale=0.4]{Line}
-\caption{An example linear best fit.}
-\end{figure} 
-
-
-\subsection{Calculating Ideal Noise and Measured Noise}
-The final step in analyzing any test data is calculating the ideal noise and measured noise. Ideal noise is calculated by $$\sigma_F = \frac{\sqrt{Flux*Time*Gain}}{Time*Gain}$$
-The measured noise is the standard deviation of the data. The measured noise (standard deviation) is plotted with time to get a better view of the data. here is an example plot:
-\begin{figure}[H]
-\includegraphics[scale=0.55]{RMS}
-\caption{RMS Vs. Time plot to visualize measured noise}
-\end{figure}
+    \subsection{Fitting Data To A 1D-Linear Model}
+    In order to get the proper standard deviation, the data is fit to a linear model to remove any trend. The data is then divided by the line to get a "de-trended" time series. Here is an example of a linear best fit:
+    \begin{figure}[H]
+        \includegraphics[scale=0.4]{Line}
+        \caption{An example linear best fit.}
+    \end{figure} 
+    
+    
+    \subsection{Calculating Ideal Noise and Measured Noise}
+    The final step in analyzing any test data is calculating the ideal noise and measured noise. Ideal noise is calculated by $$\sigma_F = \frac{\sqrt{Flux*Time*Gain}}{Time*Gain}$$
+    The measured noise is the standard deviation of the data. The measured noise (standard deviation) is plotted with time to get a better view of the data. here is an example plot:
+    \begin{figure}[H]
+        \includegraphics[scale=0.55]{RMS}
+        \caption{RMS Vs. Time plot to visualize measured noise}
+    \end{figure}
 
 
 
 \section{Correction Methods}
-There are 3 different correction methods applied to each test: Inter pixel capacitance(IPC) correction, Linearity correction and Flat Fielding. Their combination is denoted with 3 letters (either M(minus, not applied) or P(plus), applied). We tested a few tests to see which combination gives minimum standard deviation and found that the MMM (i.e. no correction method was applied) tests gave the best results. Here is the result we found:  
+There are 3 different correction methods applied to each test: Inter pixel capacitance(IPC) correction, Linearity correction and Flat Fielding. Their combination is denoted with 3 letters (either M(minus, not applied) or P(plus), applied). We tested a few tests to see which combination gives minimum standard deviation and found that the MMM (i.e. no correction method was applied) tests gave the best results. For comparison between different tests, the same radius combination [$(r_{source}, r_{in}, r_{out}) = (70, 72, 80)$] was used for all tests. Here is the result we found:  
 \begin{figure}[H]
     \centering
     \begin{subfigure}{1}
@@ -127,9 +193,20 @@ There are 3 different correction methods applied to each test: Inter pixel capac
     \end{subfigure}
 
     \begin{subfigure}{2}
-        \includegraphics[scale=0.6]{correction1}
-        \caption{A plot showing how standard deviation vary with correction method combinations}
+        \includegraphics[width=0.5\textwidth]{correction1}
+        \subcaption{Test: WLP8SUB}
     \end{subfigure}
+    
+    \begin{subfigure}{3}
+        \includegraphics[width=0.5\textwidth]{correction2}
+        \subcaption{Test: WLP8SUB640}
+    \end{subfigure}
+    
+    \begin{subfigure}{4}
+        \includegraphics[width=0.5\textwidth]{correction3}
+        \subcaption{Test: FULL1}
+    \end{subfigure}
+    \caption{A plot showing how standard deviation vary with correction method combinations}
 \end{figure}
 
 
@@ -145,6 +222,8 @@ There are 3 different correction methods applied to each test: Inter pixel capac
         \caption{PPP}
     \end{subfigure}
 \end{figure}
+
+As fig. 10. demonstrates, the IPC correction does not make an impact. Linearity correction makes a small difference of about 8ppm and flat fielding has an even smaller effect (a difference of about 0.25ppm). So the correction methods don't play a huge role.  
 
 
 \section{Different NIRCam Tests}
