@@ -1,4 +1,4 @@
- \documentclass[conference]{IEEEtran}
+\documentclass{aastex6}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subfigure}
@@ -8,17 +8,14 @@
 \begin{document}
 
 \title{Analyzing NIRCam Test Data}
-\author
-{\IEEEauthorblockN{Rafia Bushra, Everett Schlawin, Jonathan Fraine}
-\IEEEauthorblockA{Department of Astronomy/Steward Observatory\\
+\author{Rafia Bushra, Everett Schlawin and Jonathan Fraine}
+\affil{Department of Astronomy/Steward Observatory\\
 University of Arizona}
-}
-\maketitle
 
 
 
 \begin{abstract}
-The James Webb Space Telescope (JWST) is a near- and mid-infrared optimized space telescope. It will have unprecedented sensitivity and will be able to see objects fainter and further than those detectable by previous telescopes like the Hubble Space Telescope (HST). Thus, JWST will have tremendous applications in the field of exoplanets. The telescope is equipped with four sensitive instruments: NIRCam, MIRI, NIRSpec and NIRISS. Of these instruments, NIRCam will be the primary imager in the 0.6 - 5 microns wavelength range. At NASA Goddard’s cryogenic vacuum facility in Greenbelt, Maryland, The NIRCam instrument module was used to take extensive images in a controlled environment over several months. The data gathered in the tests is the subject of this article. The images obtained from these tests will be used to create light curves to simulate what happens after JWST launches. This article deals with the extraction process of the time series data and examining different analysis techniques to determine what works best for processing the data.
+The James Webb Space Telescope (JWST) is a near- and mid-infrared optimized space telescope. It will have unprecedented sensitivity and will be able to see objects fainter and further than those detectable by previous telescopes like the Hubble Space Telescope (HST). Thus, JWST will have tremendous applications in the field of exoplanets. The telescope is equipped with four sensitive instruments: NIRCam, MIRI, NIRSpec and NIRISS that will cover a wavelength range of 0.6 - 28 microns. Of these instruments, NIRCam will be the primary imager in 0.6 - 5 microns and perform spectroscopy in 2.4 - 5.0 microns wavelength ranges . At NASA Goddard’s cryogenic vacuum facility in Greenbelt, Maryland, The NIRCam instrument module was used to take extensive images in a controlled environment over several months. The data gathered in the tests is the subject of this article. The images obtained from these tests were used to create light curves to simulate  real observations of exoplanets with JWST. This article deals with the extraction process of the time series data and examining different analysis techniques to determine what works best for processing the data as interest grows in pushing JWST to new limits to observe Earth-like planets such as TRAPPIST-1d or LHS 1140 b.
 \end{abstract}
 
 
@@ -56,7 +53,7 @@ Unless otherwise mentioned, flux comparison in all tests uses background subtrac
         $$\frac{(Last Group - Bias)}{NGROUP*TGROUP}$$
         After comparison, we found that the Slope2 method gives better results. This is demonstrated in the figure below.
         \begin{figure}[H]
-            \includegraphics[width=0.5\textwidth]{Slopes}
+            \includegraphics[width=1.0\textwidth]{Slopes}
             \caption{Plot demonstrating light curves \& standard deviations obtained using Slope1 and Slope2 methods for 5 different tests.}
             \label{fig:slopes}
         \end{figure}
@@ -66,106 +63,107 @@ Unless otherwise mentioned, flux comparison in all tests uses background subtrac
         For the same test, for a particular detector, expecting all the images to share a common center is a good approximation but not very accurate. The center position is slightly for each image in the time series. This is demonstrated below:
         
         \begin{figure}[H]
+            \begin{centering}
             \includegraphics[width=0.5\textwidth]{center_positions}
             \caption{Center positions Vs. image number. The x-axis represents each individual image in the time series}
+            \end{centering}
         \end{figure}
         
         So we need speratecenter positions for each individual image. If the model's center is fitted to a Gaussian model, that gives a much closer approximation of an individual image's center. Here is an example Gaussian fit:
         
         \begin{figure}[H]
-            \includegraphics[scale=0.5]{Gaussian}
-            \caption{Example of Gaussian fitting to an image's center}
+            \begin{centering}
+                \includegraphics[scale=0.5]{Gaussian}
+                \caption{Example of Gaussian fitting to an image's center}
+            \end{centering}
         \end{figure}
         The flux is extracted using circular aperture, for which the center is needed. When extracting flux from each image of a test, their individual center obtained from Gaussian fitting will be used.  
         
         \subsubsection{Radius Testing}
         The circular aperture function used for flux extraction also requires a radius. This radius is the source radius. The radius has to be chosen so that the measured error or standard deviation is minimum. For this, we extract the flux multiple times using varying radius values and calculate standard deviations. Here is plot showing how the best radius is chosen:
         \begin{figure}[H]
+            \begin{centering}
             \includegraphics[scale=0.5]{Radius}
             \caption{A plot of Standard Deviation Vs. Aperture Radius. The minimum of the curve gives the best aperture radius}
+            \end{centering}
         \end{figure}
         
         Here is a figure to help visualize how much flux is enclosed by different radii:
         
         \begin{figure}[H]
+            \begin{centering}
             \includegraphics[width=0.5\textwidth]{varying_r.png}
             \caption{Rings of varying radius over the PSF}
+            \end{centering}
         \end{figure}
         
         
         \subsubsection{Subtracting Background}
-        Other than the light received from the source, there is usually some background noise that we have to account for in order to get more accurate results. For this we are using an annulus out side the source to subtract. For Background subtraction there a few different factors to consider,e.g. the shape of annulus, the type of average, pixel count at the edge of annulus etc. We tested different methods which are a combination of two annulus shapes (circular annulus \& circle inside square (CIS)) and three different types of average (mean, median and MAD(robust average)). We compared our results with circular annulus of astropy which considers fractional pixels at the edge.
+        Other than the light received from the source, there is usually some background noise that we have to account for in order to get more accurate results. For this we are using an annulus out side the source to subtract. For Background subtraction there a few different factors to consider,e.g. the shape of annulus, the type of average, pixel count at the edge of annulus etc. We tested different methods which are a combination of two annulus shapes (circular annulus \& circle inside square (CIS)) and three different types of average (mean, median and MAD(robust average)). We compared our results with circular annulus of astropy which considers fractional pixels at the edge. \\
         
-        \begin{figure}[H]
-            \includegraphics[width = 0.5\textwidth]{Bg}
-            \caption{Comparing different methods of background subtractions.}
-        \end{figure}
-        
-        In most cases, the robust average with circular annulus seems to be doing slightly better than others and usually is almost the same as astropy's circular annulus. Since astropy's circular annulus is not very different from the robust average, in our test, we use astropy as it takes care of fractional pixels.\\
-        
-        The annulus has an inner radius and an outer radius. So now, there are three different radii to consider: source radius, inner radius (BG subtraction) and outer radius (BG subtraction). The best combination of these three is determined through a radius test. 
+        The annulus has an inner radius and an outer radius. So now, there are three different radii to consider: source radius, inner radius (BG subtraction) and outer radius (BG subtraction). The best combination of these three is determined through a radius test. \\
         
         \begin{figure}[H]
             \centering
             \begin{subfigure}{1}
-                \includegraphics[width = 0.5\textwidth]{Combo}
-                 \includegraphics[width = 0.5\textwidth]{sub320_rings}
+                \includegraphics[width = 0.4\textwidth]{Combo}
+                \includegraphics[width = 0.4\textwidth]{sub320_rings}
                 \caption{SUB320}
             \end{subfigure}
         
             \begin{subfigure}{2}
-                \includegraphics[width = 0.5\textwidth]{Radius_640}
-                \includegraphics[width = 0.5\textwidth]{sub640_rings}
+                \includegraphics[width = 0.4\textwidth]{Radius_640}
+                \includegraphics[width = 0.4\textwidth]{sub640_rings}
                 \caption{SUB640}
             \end{subfigure}
             
             \begin{subfigure}{3}
-                \includegraphics[width = 0.5\textwidth]{Radius_CLR}
-                \includegraphics[width = 0.5\textwidth]{subfull1_rings}
+                \includegraphics[width = 0.4\textwidth]{Radius_CLR}
+                \includegraphics[width = 0.4\textwidth]{full1_rings}
                 \caption{CLRSUB}
             \end{subfigure}
             \caption{A plot of Standard Deviation Vs. Source Radius for different combinations of inner and out radii. The minimum of the curves give the best combination}
         \end{figure}
         
-        So far we have been trying out different shapes for background. Now we take a different approach by subtracting background from each column of each image. For a each column, we masked the source pixels and pixels outside the background range. We fit a polynomial to the background and subtract it off from the original. Here is a demonstration of the difference between the original and background subtracted version:
+        We have also considered two other methods that does not have a particular shape rather is done column by column or row by row. In this method, we considered the background in a single column (or row) at a time, masked source pixels and pixels outside the background range and fit a suitable polynomial to it. We subtracted off the background value of that column from the original one, repeated the process for every column and found the standard deviation of the net residual. For a single column:\\
         
         \begin{figure}[H]
             \centering
-            \begin{subfigure}{1}
-                \includegraphics[width = 0.5\textwidth]{col_plot}
-                \caption{A plot of the 160th column of an image in its original, masked, fitted and background subtracted forms}
-            \end{subfigure}
+            \includegraphics[width = 0.5\textwidth]{col_plot}
+            \caption{A plot of the 160th column of an image in its original, masked, fitted and background subtracted versions}
+            \end{figure}
+            
+        Here, the masked points are the background points in the column that remained after masking the source points. As expected, they coincide with the unmasked (original) flux only towards the sides. The detrended curve is what we get after subtracting the polynomial fit to masked points from the original unmasked flux.
         
-            \begin{subfigure}{2}
-                \includegraphics[width = 0.5\textwidth]{col_image}
-                \caption{Comparing the background subtracted image(left) to the original one(right)}
-            \end{subfigure}
+        Here is a summary of all the methods we used:
+        
+        \begin{figure}[H]
+            \begin{centering}
+            \includegraphics[width=1.0\textwidth]{bkg_sub}
+            \caption{Different background subtraction methods. The row by row method works best for the full array tests consistently.}
+            \end{centering}
         \end{figure}
         
+        The row by row subtracting method makes a significant differece for the full array tests. For the sub array tests, some circular annulus is doing slightly better than row by row and astropy but only by a few parts per million. Since the difference is really small for sub arrays, Astropy might be a better option as it accounts for fractional pixels.\\
         
-        \subsubsection{Testing Source Aperture Geometry}
-        So far, we kept a basic source aperture (circular aperture) and carried on with other tests like radius combination, generating centers, background subtraction etc. Now that we have a grasp on the other features, we test which source aperture geometry works best with those features. Apart from the circular aperture, we used an annular aperture. 
+        
+        
+        
+        \subsubsection{Source Aperture Geometry}
+        So far, we kept a basic source aperture (circular aperture) and carried on with other tests like radius combination, gaussian fitting, background subtraction etc. Now that we have a grasp on the other features, we test which source aperture geometry works best with those features. Apart from the circular aperture, we used an annular aperture. \\
         
         \begin{figure}[H]
             \includegraphics[scale=0.4]{Annular_source}
-            \caption{The annular source aperture used for comparison.}
+            \caption{The annular source aperture. Since the center is not as bright as rest of the psf, we picked an annular aperture that envelopes brightest pixels of the psf.}
         \end{figure}
         
-        \begin{center}
-            \centering
-            \label{tab:table 1}
-            \begin{tabular}{|c c c|}
-                \hline
-                 Test Name & Aperture Type & Standard Deviation  \\
-                 \hline
-                 WLP8SUB & Circular & 1559.33502547 \\
-                 WLP8SUB & Annular & 1581.60938155 \\
-                 FULL1 & Circular & 2681.52173084 \\
-                 FULL1 & Annular & 2509.46089297 \\
-                 \hline
-            \end{tabular}
-            \caption{Comparing between circular \& annular aperture}
-        \end{center}
+        
+        \begin{figure}[H]
+            \includegraphics[scale=0.4]{src_ap}
+            \caption{Comparing circular and annular source apertures.}
+        \end{figure}
+        
+        The annular aperture, which ignore the relatively dim center gives better results in most cases. It only does worse for WLP8SUB but only ~0.3 ppm.
      
  
     \subsection{Fitting Data To A 1D-Linear Model}
@@ -187,27 +185,25 @@ Unless otherwise mentioned, flux comparison in all tests uses background subtrac
 
 
 \section{Correction Methods}
-There are 3 different correction methods applied to each test: Inter pixel capacitance(IPC) correction, Linearity correction and Flat Fielding. Their combination is denoted with 3 letters (either M(minus, not applied) or P(plus), applied). We tested a few tests to see which combination gives minimum standard deviation and found that the MMM (i.e. no correction method was applied) tests gave the best results. For comparison between different tests, the same radius combination [$(r_{source}, r_{in}, r_{out}) = (70, 72, 80)$] was used for all tests. Here is the result we found:  
+There are 3 different correction methods applied to each test: Inter pixel capacitance(IPC) correction, Linearity correction and Flat Fielding. Their combination is denoted with 3 letters (either M(minus, not applied) or P(plus), applied). We tested a few tests to see which combination gives minimum standard deviation and found that the MMM (i.e. no correction method was applied) tests gave the best results. For comparison between different tests, the same radius combination [$(r_{source}, r_{in}, r_{out}) = (70, 72, 80)$] was used for all tests. Here is the result we found:  \\
 \begin{figure}[H]
     \centering
+    \includegraphics[width=0.7\textwidth]{correction}
+    \caption{Table showing the standard deviations for different tests. In the test name column, '1' stands for 'M' and '2' stands for 'P'. E.g. '121' is equivalent to 'MPM'}
+\end{figure}
+\begin{figure}
+    \centering
     \begin{subfigure}{1}
-        \includegraphics[width=8cm,height=10cm,keepaspectratio]{correction}
-        \caption{Table showing the standard deviations for different tests. In the test name column, '1' stands for 'M' and '2' stands for 'P'. E.g. '121' is equivalent to 'MPM'}
+        \includegraphics[width=0.45\textwidth]{correction1}
+        \caption{Test: WLP8SUB}
     \end{subfigure}
-
     \begin{subfigure}{2}
-        \includegraphics[width=0.5\textwidth]{correction1}
-        \subcaption{Test: WLP8SUB}
+        \includegraphics[width=0.45\textwidth]{correction2}
+        \caption{Test: WLP8SUB640}
     \end{subfigure}
-    
     \begin{subfigure}{3}
-        \includegraphics[width=0.5\textwidth]{correction2}
-        \subcaption{Test: WLP8SUB640}
-    \end{subfigure}
-    
-    \begin{subfigure}{4}
-        \includegraphics[width=0.5\textwidth]{correction3}
-        \subcaption{Test: FULL1}
+        \includegraphics[width=0.45\textwidth]{correction3}
+        \caption{Test: FULL1}
     \end{subfigure}
     \caption{A plot showing how standard deviation vary with correction method combinations}
 \end{figure}
@@ -226,7 +222,34 @@ There are 3 different correction methods applied to each test: Inter pixel capac
     \end{subfigure}
 \end{figure}
 
-As fig. 10. demonstrates, the IPC correction does not make an impact. Linearity correction makes a small difference of about 8ppm and flat fielding has an even smaller effect (a difference of about 0.25ppm). So the correction methods don't play a huge role.  
+As fig. 10. demonstrates, the IPC correction does not make an impact. Linearity correction makes a small difference of about 8ppm and flat fielding has an even smaller effect (a difference of about 0.25ppm). So the correction methods don't play a huge role.  \\
+
+
+
+
+\section{Source Stability}
+
+Since the center position moves around during the tests, we did a test to see how stable the source is. We did this by extracting time series using rectangular apertures on either side of the source center. The configuration looks like:\\
+
+
+\begin{figure}[H]
+    \begin{centering}
+    \includegraphics[width=0.5\textwidth]{stability1}
+    \caption{Stability test using rectangular apertures.}
+    \end{centering}
+\end{figure}
+
+The red rectangles are source apertures and yellow ones are background apertures. Two time series can be extracted using the apertures on the left and right sides.\\
+
+\begin{figure}[H]
+    \begin{centering}
+    \includegraphics[width=0.5\textwidth]{stability2}
+    \caption{Comparing time series from both sides}
+    \end{centering}
+\end{figure}
+
+The right side deviates from the left side by about 10\%. 
+
 
 
 \section{Different NIRCam Tests}
@@ -782,5 +805,7 @@ In the previous section, we discussed the general method of analyzing a test and
 
 \section{Conclusion}
 After analyzing the tests, we found that the best way to process the data involves the following methods: 1) Generating separate centers for each image 2) Doing a linear fitting to remove trend 3) Using Slope2 method for files with $NGROUP = 2$ 4) Using annular aperture function rather than median subtraction to subtract background \& 5) Using MMM tests, i.e. apply no correction method  
+
+\bibliographystyle{aasjournal}
 
 \end{document}
